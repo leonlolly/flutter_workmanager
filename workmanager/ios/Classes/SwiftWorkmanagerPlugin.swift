@@ -63,6 +63,21 @@ public class SwiftWorkmanagerPlugin: FlutterPluginAppLifeCycleDelegate {
                 }
             }
 
+            struct SetResult {
+                static let name = "\(SetResult.self)".lowercasingFirst
+                enum Arguments: String {
+                    case uniqueName
+                    case result
+                }
+            }
+
+            struct GetResult {
+                static let name = "\(GetResult.self)".lowercasingFirst
+                enum Arguments: String {
+                    case uniqueName
+                }
+            }
+
             struct CancelTaskByUniqueName {
                 static let name = "\(CancelTaskByUniqueName.self)".lowercasingFirst
                 enum Arguments: String {
@@ -279,6 +294,12 @@ extension SwiftWorkmanagerPlugin: FlutterPlugin {
         case (ForegroundMethodChannel.Methods.CancelAllTasks.name, .none):
             cancelAllTasks(result: result)
             return
+        case (ForegroundMethodChannel.Methods.SetResult.name, let.some(arguments)):
+            setResult(arguments: arguments, result: result)
+            return
+        case (ForegroundMethodChannel.Methods.GetResult.name, let.some(arguments)):
+            getResult(arguments: arguments, result: result)
+            return
         case (ForegroundMethodChannel.Methods.CancelTaskByUniqueName.name, let .some(arguments)):
             cancelTaskByUniqueName(arguments: arguments, result: result)
             return
@@ -412,6 +433,27 @@ extension SwiftWorkmanagerPlugin: FlutterPlugin {
             BGTaskScheduler.shared.cancelAllTaskRequests()
         }
         result(true)
+    }
+
+    private func setResult(arguments: [AnyHashable: Any], result: @escaping FlutterResult) {
+        let method = ForegroundMethodChannel.Methods.SetResult.self
+        guard let uniqueName = arguments[method.Arguments.uniqueName.rawValue] as? String,
+              let resultValue = arguments[method.Arguments.result.rawValue] else {
+            result(WMPError.invalidParameters.asFlutterError)
+            return
+        }
+        UserDefaultsHelper.storeResult(uniqueName, resultValue)
+        result(true)
+    }
+
+    private func getResult(arguments: [AnyHashable: Any], result: @escaping FlutterResult) {
+        let method = ForegroundMethodChannel.Methods.GetResult.self
+        guard let uniqueName = arguments[method.Arguments.uniqueName.rawValue] as? String else {
+            result(WMPError.invalidParameters.asFlutterError)
+            return
+        }
+        let resultValue = UserDefaultsHelper.getResult(uniqueName)
+        result(resultValue)
     }
 
     private func cancelTaskByUniqueName(arguments: [AnyHashable: Any], result: @escaping FlutterResult) {

@@ -52,4 +52,12 @@ struct UserDefaultsHelper {
         return userDefaults.value(forKey: key.stringValue) as? T
     }
 
+    static func storeResult(_ uniqueName: String, _ result: Any) {
+        UserDefaults.standard.set(result, forKey: "\(SwiftWorkmanagerPlugin.identifier).result.\(uniqueName)")
+    }
+
+    static func getResult(_ uniqueName: String) -> Any? {
+        return UserDefaults.standard.value(forKey: "\(SwiftWorkmanagerPlugin.identifier).result.\(uniqueName)")
+    }
+
 }

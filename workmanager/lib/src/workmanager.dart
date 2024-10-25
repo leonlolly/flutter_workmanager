@@ -333,6 +333,21 @@ class Workmanager {
         {"tag": tag},
       );
 
+  Future<void> setResult(String uniqueName, dynamic result) async {
+    await _backgroundChannel.invokeMethod(
+      "setResult",
+      {"uniqueName": uniqueName, "result": result},
+    );
+  }
+
+  Future<dynamic> getResult(String uniqueName) async {
+    final result = await _backgroundChannel.invokeMethod(
+      "getResult",
+      {"uniqueName": uniqueName},
+    );
+    return result;
+  }
+
   /// Cancels all tasks
   Future<void> cancelAll() async =>
       await _foregroundChannel.invokeMethod("cancelAllTasks");

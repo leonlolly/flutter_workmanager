@@ -22,5 +22,13 @@ object SharedPreferenceHelper {
         return ctx.prefs().getLong(CALLBACK_DISPATCHER_HANDLE_KEY, -1L)
     }
 
+    fun saveResult(context: Context, uniqueName: String, result: String) {
+        context.getSharedPreferences("workmanager_results", Context.MODE_PRIVATE).edit().putString(uniqueName, result).apply()
+    }
+
+    fun getResult(context: Context, uniqueName: String): String? {
+        return context.getSharedPreferences("workmanager_results", Context.MODE_PRIVATE).getString(uniqueName, null)
+    }
+
     fun hasCallbackHandle(ctx: Context) = ctx.prefs().contains(CALLBACK_DISPATCHER_HANDLE_KEY)
 }

@@ -59,6 +59,18 @@ class WorkmanagerCallHandler(private val ctx: Context) : MethodChannel.MethodCal
                     extractedCall,
                     result,
                 )
+            is WorkManagerCall.SetResult ->
+                SetResultHandler.handle(
+                    ctx,
+                    extractedCall,
+                    result
+                )
+            is WorkManagerCall.GetResult ->
+                GetResultHandler.handle(
+                    ctx,
+                    extractedCall,
+                    result
+                )
             is WorkManagerCall.Failed ->
                 FailedTaskHandler(extractedCall.code).handle(
                     ctx,
@@ -194,6 +206,31 @@ private object UnregisterTaskHandler : CallHandler<WorkManagerCall.CancelTask> {
             WorkManagerCall.CancelTask.All -> WM.cancelAll(context)
         }
         result.success()
+    }
+}
+
+private object SetResultHandler : CallHandler<WorkManagerCall.SetResult> {
+    override fun handle(
+        context: Context,
+        convertedCall: WorkManagerCall.SetResult,
+        result: MethodChannel.Result,
+    ) {
+        val uniqueName = convertedCall.uniqueName
+        val returnValue = convertedCall.result
+        SharedPreferenceHelper.saveResult(context, uniqueName, returnValue)
+        result.success()
+    }
+}
+
+private object GetResultHandler : CallHandler<WorkManagerCall.GetResult> {
+    override fun handle(
+        context: Context,
+        convertedCall: WorkManagerCall.GetResult,
+        result: MethodChannel.Result,
+    ) {
+        val uniqueName = convertedCall.uniqueName
+        val returnValue = SharedPreferenceHelper.getResult(context, uniqueName)
+        result.success(returnValue)
     }
 }
 

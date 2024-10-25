@@ -155,6 +155,24 @@ sealed class WorkManagerCall {
         object All : CancelTask()
     }
 
+    data class SetResult(
+        val uniqueName: String,
+        val result: String,
+    ) : WorkManagerCall() {
+        companion object KEYS {
+            const val SET_RESULT_UNIQUE_NAME_KEY = "uniqueName"
+            const val SET_RESULT_RESULT_KEY = "result"
+        }
+    }
+
+    data class GetResult(
+        val uniqueName: String,
+    ) : WorkManagerCall() {
+        companion object KEYS {
+            const val GET_RESULT_UNIQUE_NAME_KEY = "uniqueName"
+        }
+    }
+
     object Unknown : WorkManagerCall()
 
     class Failed(val code: String) : WorkManagerCall()
@@ -176,6 +194,10 @@ object Extractor {
 
         CANCEL_TASK_BY_UNIQUE_NAME("cancelTaskByUniqueName"),
         CANCEL_TASK_BY_TAG("cancelTaskByTag"),
+
+        SET_RESULT("setResult"),
+        GET_RESULT("getResult"),
+
         CANCEL_ALL("cancelAllTasks"),
 
         UNKNOWN(null),
@@ -257,6 +279,19 @@ object Extractor {
                         UNREGISTER_TASK_TAG_KEY,
                     )!!,
                 )
+
+            PossibleWorkManagerCall.SET_RESULT -> {
+                WorkManagerCall.SetResult(
+                    uniqueName = call.argument<String>(SET_RESULT_UNIQUE_NAME_KEY)!!,
+                    result = call.argument<String>(SET_RESULT_RESULT_KEY)!!,
+                )
+            }
+            PossibleWorkManagerCall.GET_RESULT -> {
+                WorkManagerCall.GetResult(
+                    uniqueName = call.argument<String>(GET_RESULT_UNIQUE_NAME_KEY)!!,
+                )
+            }
+
             PossibleWorkManagerCall.CANCEL_ALL -> WorkManagerCall.CancelTask.All
 
             PossibleWorkManagerCall.UNKNOWN -> WorkManagerCall.Unknown
